@@ -29,12 +29,18 @@ public class MovementController : MonoBehaviour
     [Tooltip("How much upward force Steve gets when jumping")]
     [SerializeField] private float jumpForce = 6f;
 
-    private bool isGrounded;
+    [Header("Ground Detection")]
+    [Tooltip("Shows wheather Steve is currently on the ground")]
+    [SerializeField] private bool isGrounded;
+
+    [Header("Steve's Audio")]
+    [Tooltip("The Audio Source that plays Steve's sounds")]
+    [SerializeField] private AudioSource steveAudioSource;
 
     //Stores Steve's starting position in the level.
     private Vector3 startPosition;
 
-    private int cointCount;
+    private int coinCount;
 
     private void Start()
     {
@@ -51,6 +57,11 @@ public class MovementController : MonoBehaviour
 
     void MoveLeftAndRight()
     {
+        //doesnt contiue the method unless on the ground
+        if (!isGrounded)
+        { 
+            return;
+        }
         //Uses the normal movement speed by default.
         float currentSpeed = speed;
 
@@ -59,7 +70,7 @@ public class MovementController : MonoBehaviour
         {
             //Changes current speed to the be the value of sprint speed.
             currentSpeed = sprintSpeed;
-            Debug.Log("Steve is now running");
+            //Debug.Log("Steve is now running");
         }
         
         //Moves right using the right arrow key or the d key.
@@ -68,7 +79,7 @@ public class MovementController : MonoBehaviour
             //Moves Steve right using the speed value while keeping his vertical movement the same.
             theRB.linearVelocity = new Vector2(currentSpeed, theRB.linearVelocity.y);
             spriteRenderer.flipX = false;
-            Debug.Log("Steve is now facing right and is moving");
+            //Debug.Log("Steve is now facing right and is moving");
         }
 
         //Moves left using the left arrow key or the a key.
@@ -77,14 +88,14 @@ public class MovementController : MonoBehaviour
             //Moves Steve left using the speed value while keeping his vertical movement the same.
             theRB.linearVelocity = new Vector2(-currentSpeed, theRB.linearVelocity.y);
             spriteRenderer.flipX = true;
-            Debug.Log("Steve is now facing left and is moving");
+            //Debug.Log("Steve is now facing left and is moving");
         }
     }
 
     void Jump()
     {
         //jump using the up arrow or the w key and checks is your on the ground.
-        if (Keyboard.current.upArrowKey.wasPressedThisFrame || Keyboard.current.wKey.wasPressedThisFrame && isGrounded)
+        if ((Keyboard.current.upArrowKey.wasPressedThisFrame || Keyboard.current.wKey.wasPressedThisFrame) && isGrounded)
         {
             //Applies an upwards force to Steve using the jumpForce value to make him jump.
             theRB.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
@@ -117,6 +128,12 @@ public class MovementController : MonoBehaviour
             //Sets the grounded to true when Steve touches something.
             isGrounded = true;
         }
+
+        if (collision.gameObject.CompareTag("Wall"))
+        {
+            steveAudioSource.Play();
+            Debug.Log("Played mission failed");
+        }
     }
 
     void OnCollisionExit2D(Collision2D collision)
@@ -138,8 +155,8 @@ public class MovementController : MonoBehaviour
         {
             Debug.Log("Coin Collected!");
             Destroy(collision.gameObject);
-            cointCount++;
-            Debug.Log("Total coins: " + cointCount);
+            coinCount++;
+            Debug.Log("Total coins: " + coinCount);
         }
 
         else if (collision.gameObject.CompareTag("Spike"))
