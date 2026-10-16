@@ -33,14 +33,19 @@ public class MovementController : MonoBehaviour
     [Tooltip("Shows wheather Steve is currently on the ground")]
     [SerializeField] private bool isGrounded;
 
+    [Space(5)]
+
     [Header("Steve's Audio")]
     [Tooltip("The Audio Source that plays Steve's sounds")]
     [SerializeField] private AudioSource steveAudioSource;
 
+    [Tooltip("the Audio Source that plays when Steve lands")]
+    [SerializeField] private AudioSource landingAudioSource;
+
     //Stores Steve's starting position in the level.
     private Vector3 startPosition;
-
     private int coinCount;
+    private int wallHits = 0;
 
     private void Start()
     {
@@ -99,7 +104,6 @@ public class MovementController : MonoBehaviour
         {
             //Applies an upwards force to Steve using the jumpForce value to make him jump.
             theRB.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
-
             Debug.Log("Jump! Steve's Velocity is " + theRB.linearVelocity);
         }
     }
@@ -111,7 +115,6 @@ public class MovementController : MonoBehaviour
         {
             //returns Steve to his starting position.
             transform.position = startPosition;
-
             //stops Steve from moving when he spawn. 
             theRB.linearVelocity = Vector2.zero;
         }
@@ -123,6 +126,7 @@ public class MovementController : MonoBehaviour
         {
             if (!isGrounded)
             {
+                landingAudioSource.Play();
                 Debug.Log("Steve is on the ground!");
             }
             //Sets the grounded to true when Steve touches something.
@@ -131,8 +135,14 @@ public class MovementController : MonoBehaviour
 
         if (collision.gameObject.CompareTag("Wall"))
         {
-            steveAudioSource.Play();
-            Debug.Log("Played mission failed");
+            wallHits++;
+            Debug.Log("wall hits: " + wallHits);
+
+            if (wallHits >= 3)
+            {
+                steveAudioSource.Play();
+                wallHits = 0;
+            }
         }
     }
 
@@ -161,10 +171,8 @@ public class MovementController : MonoBehaviour
 
         else if (collision.gameObject.CompareTag("Spike"))
         {
-            Debug.Log("Steve hit a spike!");
-            
+            Debug.Log("Steve hit a spike!"); 
             transform.position = startPosition;
-
             theRB.linearVelocity = Vector2.zero;
         }
     }

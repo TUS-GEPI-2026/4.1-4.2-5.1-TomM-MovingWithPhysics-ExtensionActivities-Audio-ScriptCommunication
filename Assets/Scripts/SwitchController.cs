@@ -8,12 +8,14 @@ public class SwitchController : MonoBehaviour
     [Tooltip("Shows if Steve is standing near the switch")]
     [SerializeField] private bool switchActive;
 
+    [Tooltip("The Sprite Renderer used to change the switch colour")]
+    [SerializeField] private SpriteRenderer switchSpriteRenderer;
+
+    [Space(5)]
+
     [Header("Radio Settings")]
     [Tooltip("Shows whether the radio is turned on or off")]
     [SerializeField] private bool switchIsOn;
-
-    [Tooltip("The Sprite Renderer used to change the switch colour")]
-    [SerializeField] private SpriteRenderer switchSpriteRenderer;
 
     [Header("Radio Connection")]
     [Tooltip("The radio controlled by this switch")]
@@ -34,7 +36,6 @@ public class SwitchController : MonoBehaviour
         if (other.gameObject.CompareTag("Player"))
         { 
             switchActive = true;
-
             Debug.Log("Steve is at the switch");
         }
     }
@@ -44,7 +45,9 @@ public class SwitchController : MonoBehaviour
         if (other.gameObject.CompareTag("Player"))
         { 
             switchActive = false;
-
+            switchIsOn = false;
+            switchSpriteRenderer.color = Color.red;
+            radioController.StopPlayingSong();
             Debug.Log("Steve has left the switch");
         }
     }
@@ -59,16 +62,23 @@ public class SwitchController : MonoBehaviour
             if (switchIsOn)
             {
                 switchSpriteRenderer.color = Color.green;
-
                 radioController.PlayNextSong();
             }
 
             else
             {
                 switchSpriteRenderer.color = Color.red;
-
                 radioController.StopPlayingSong();
             }
+        }
+        if (switchActive && Keyboard.current.digit1Key.wasPressedThisFrame)
+        {
+            radioController.TurnVolumeUp();
+        }
+
+        if (switchActive && Keyboard.current.digit2Key.wasPressedThisFrame)
+        {
+            radioController.TurnVolumeDown();
         }
     }
 }
